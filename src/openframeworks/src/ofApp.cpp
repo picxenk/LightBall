@@ -10,7 +10,7 @@ void ofApp::setup(){
     captureWidth = 640;
     captureHeight = 480;
     brightThreshold = 200;
-    alphaThreshold = 35;
+    alphaThreshold = 75;
     scaleRatio = float(ofGetWindowWidth())/float(captureWidth);
 
     cam.setDeviceID(0);
