@@ -2,19 +2,34 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    //ofSetVerticalSync(true);
+    ofSetVerticalSync(true);
+    
+    IS_FLIPPED = true;
+    IS_RESETED = true;
+    captureWidth = 640;
+    captureHeight = 480;
+    brightThreshold = 200;
+    alphaThreshold = 35;
+    scaleRatio = float(ofGetWindowWidth())/float(captureWidth);
+
     cam.setDeviceID(0);
-    cam.setDesiredFrameRate(60);
+    cam.setDesiredFrameRate(30);
     cam.initGrabber(captureWidth, captureHeight);
     
     videoAlpha   = new unsigned char[captureWidth*captureHeight*4];
     videoTexture.allocate(captureWidth,captureHeight, GL_RGBA);
 
-    //ofSetVerticalSync(true);
-    
-    ofSetBackgroundAuto(false);
     ofBackground(0);
-    brightThreshold = 200;
-    alphaThreshold = 35;
+    ofSetBackgroundAuto(false);
+
+    // ofSetBackgroundAuto not working in Raspberry Pi 2
+#ifdef TARGET_RASPBERRY_PI
+    ping = new ofFbo();
+    pong = new ofFbo();
+    ping->allocate(ofGetWidth(), ofGetHeight(), GL_RGBA, 0);
+    pong->allocate(ofGetWidth(), ofGetHeight(), GL_RGBA, 0);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -47,22 +62,41 @@ void ofApp::update(){
 void ofApp::draw(){
     if (IS_RESETED) {
         ofBackground(0); IS_RESETED = false;
+        #ifdef TARGET_RASPBERRY_PI
+          ping->begin(); ofClear(0,0,0,0); ping->end();
+          pong->begin(); ofClear(0,0,0,0); pong->end();
+        #endif
     }
+
+#ifdef TARGET_RASPBERRY_PI
+    ping->begin();
+    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+    pong->draw(0,0);
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    videoTexture.draw(0,(ofGetWindowHeight()-(captureHeight * scaleRatio)), ofGetWindowWidth(), captureHeight * scaleRatio);
+    ofDisableBlendMode();
+    ping->end();
+#else 
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     ofEnableBlendMode(OF_BLENDMODE_ADD);
-    float ratio = float(ofGetWindowWidth())/float(captureWidth);
+#endif
+    
     ofPushMatrix();
     if (IS_FLIPPED) {
         ofScale( -1, 1, 1 ); // flip side
         ofTranslate(-ofGetWindowWidth(), 0, 0);
     }
-//    else {
-//        videoTexture.draw(0, 0, captureWidth, captureHeight);
-//    }
-    videoTexture.draw(0,(ofGetWindowHeight()-(captureHeight * ratio)), ofGetWindowWidth(), captureHeight * ratio);
-    ofPopMatrix();
+
+#ifdef TARGET_RASPBERRY_PI
+    ping->draw(0,0);
+    ofFbo* temp = ping;
+    ping = pong;
+    pong = temp;
+#else
+    videoTexture.draw(0,(ofGetWindowHeight()-(captureHeight * scaleRatio)), ofGetWindowWidth(), captureHeight * scaleRatio);
     ofDisableBlendMode();
-        
+#endif
+    ofPopMatrix();
     return;
 }
 
@@ -74,18 +108,16 @@ void ofApp::saveCanvas()
 }
 
 
-
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     switch (key) {
         case 'f':
-//            ofToggleFullscreen();
+            //ofToggleFullscreen();
             IS_FLIPPED = !IS_FLIPPED;
             break;
         case ' ':
             saveCanvas();
             IS_RESETED = true;
-            // save image
             break;
         case 's':
             saveCanvas();

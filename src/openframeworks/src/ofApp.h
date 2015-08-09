@@ -22,20 +22,26 @@ class ofApp : public ofBaseApp{
 
     
     //int BLEND_MODE = LIGHTEST;
-    bool IS_FLIPPED = true;
-    bool IS_RESETED = true;
+    bool IS_FLIPPED;
+    bool IS_RESETED;
     
     ofVideoGrabber cam;
     unsigned char * videoAlpha;
     ofTexture videoTexture;
     
     //PImage canvas, canvas_back;
+    ofImage canvas;
     ofImage canvas_back;
     
-    int captureWidth = 640;
-    int captureHeight = 480;
-    int captureX = 0;
-    int captureY = 0;
+    int captureWidth;
+    int captureHeight;
     int brightThreshold, alphaThreshold;
+
+    float scaleRatio;
+
+#ifdef TARGET_RASPBERRY_PI
+    ofFbo* ping;
+    ofFbo* pong;
+#endif
 		
 };
