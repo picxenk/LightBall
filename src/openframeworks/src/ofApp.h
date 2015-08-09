@@ -21,7 +21,6 @@ class ofApp : public ofBaseApp{
     void saveCanvas();
 
     
-    //int BLEND_MODE = LIGHTEST;
     bool IS_FLIPPED;
     bool IS_RESETED;
     
@@ -29,7 +28,6 @@ class ofApp : public ofBaseApp{
     unsigned char * videoAlpha;
     ofTexture videoTexture;
     
-    //PImage canvas, canvas_back;
     ofImage canvas;
     ofImage canvas_back;
     
@@ -43,5 +41,4 @@ class ofApp : public ofBaseApp{
     ofFbo* ping;
     ofFbo* pong;
 #endif
-		
 };
