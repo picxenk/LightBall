@@ -15,14 +15,14 @@ import processing.video.*;
  *******************************************************************/
 
 // fast computer: 800*600, slow computer: 640*480
-int captureResolutions[][] = {{640, 480}, {800, 600}, {1280, 700}};
-int resolution = 0; // choose 0, 1, 2, .. for captureResolution.
+int captureResolutions[][] = {{640, 360}, {640, 480}, {800, 600}, {1280, 720}};
+int resolution = 1; // choose 0, 1, 2, .. for captureResolution.
 
 int BLEND_MODE = LIGHTEST;
 boolean IS_FLIPPED = true;
 
 Capture cam;
-PImage canvas, canvas_back;
+PImage canvas, lightball;
 
 int captureWidth;
 int captureHeight;
@@ -35,7 +35,13 @@ int captureY = 0;
  *******************************************************************/
 void setup() {
   size(displayWidth, displayHeight);
+  noCursor();
+
   setupCanvas();
+  printCameraList();
+
+  cam = new Capture(this, captureWidth, captureHeight);  
+  cam.start();
 }
 
 
@@ -45,16 +51,15 @@ void setup() {
 void draw() {
   if (cam.available() == true) {
     cam.read();
-    cam.loadPixels();
 
     if (IS_FLIPPED) {
-      canvas = flipCanvas(cam);
+      lightball = flipCanvas(cam);
     } else {
-      canvas = cam;
+      lightball = cam;
     }
 
-    canvas_back.blend(canvas, 0, 0, captureWidth, captureHeight, 0, 0, captureWidth, captureHeight, BLEND_MODE);
-    set(captureX, captureY, canvas_back);
+    canvas.blend(lightball, 0, 0, captureWidth, captureHeight, 0, 0, captureWidth, captureHeight, BLEND_MODE);
+    set(captureX, captureY, canvas);
   }
 }
 
@@ -68,8 +73,8 @@ void keyPressed() {
     cam.start();
     cam.read();
     background(0);
-    canvas_back = createImage(captureWidth, captureHeight, RGB);
-    image(canvas_back, captureX, captureY, captureWidth, captureHeight);
+    canvas = createImage(captureWidth, captureHeight, RGB);
+    image(canvas, captureX, captureY, captureWidth, captureHeight);
   }
   if (key=='s') {
     saveCanvas();
@@ -92,7 +97,6 @@ void keyPressed() {
   if (key=='z') {
     cam.stop();
   }
-  
 }
 
 
@@ -104,15 +108,22 @@ void setupCanvas() {
   captureWidth  = captureResolutions[resolution][0];
   captureHeight = captureResolutions[resolution][1];
 
-  canvas = createImage(captureWidth, captureHeight, RGB);  
-  canvas_back = createImage(captureWidth, captureHeight, RGB);
+  lightball = createImage(captureWidth, captureHeight, RGB);  
+  canvas = createImage(captureWidth, captureHeight, RGB);
 
-  cam = new Capture(this, captureWidth, captureHeight);  
-  cam.start();
-  cam.read();
+
+  //cam.read();
 
   captureX = width/2-captureWidth/2;
   captureY = height/2-captureHeight/2;
+}
+
+void printCameraList() {
+  String[] cams;
+  cams = Capture.list();
+  for (int i=0; i<cams.length; i++) {
+    println(cams[i]);
+  }
 }
 
 
@@ -132,27 +143,27 @@ PImage flipCanvas(PImage cam) {
 void saveCanvas() {
   String image_name;
   image_name = "./img/"+str(year())+str(month())+str(day())+"_"+str(hour())+str(minute())+str(second())+".png";
-  canvas_back.save(image_name);
+  canvas.save(image_name);
 }
 
 
 void filterGray() {
   cam.stop();
-  canvas_back.filter(GRAY);
-  canvas_back.filter(POSTERIZE, 9);
-  set(captureX, captureY, canvas_back);
+  canvas.filter(GRAY);
+  canvas.filter(POSTERIZE, 9);
+  set(captureX, captureY, canvas);
 }
 
 
 void filterInvert() {
   cam.stop();
-  canvas_back.filter(INVERT);
-  set(captureX, captureY, canvas_back);
+  canvas.filter(INVERT);
+  set(captureX, captureY, canvas);
 }
 
 
 void filterDilate() {
   cam.stop();
-  canvas_back.filter(DILATE);
-  set(captureX, captureY, canvas_back);
+  canvas.filter(DILATE);
+  set(captureX, captureY, canvas);
 }
