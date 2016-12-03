@@ -53,8 +53,8 @@ void draw() {
     cam.read();
 
     lightball = readLight(cam);
-
     canvas.blend(lightball, 0, 0, captureWidth, captureHeight, 0, 0, captureWidth, captureHeight, BLEND_MODE);
+    
     set(captureX, captureY, canvas);
   }
 }
