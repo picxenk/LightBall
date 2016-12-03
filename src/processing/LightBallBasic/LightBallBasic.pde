@@ -52,11 +52,7 @@ void draw() {
   if (cam.available() == true) {
     cam.read();
 
-    if (IS_FLIPPED) {
-      lightball = flipCanvas(cam);
-    } else {
-      lightball = cam;
-    }
+    lightball = readLight(cam);
 
     canvas.blend(lightball, 0, 0, captureWidth, captureHeight, 0, 0, captureWidth, captureHeight, BLEND_MODE);
     set(captureX, captureY, canvas);
@@ -118,11 +114,21 @@ void setupCanvas() {
   captureY = height/2-captureHeight/2;
 }
 
+
 void printCameraList() {
   String[] cams;
   cams = Capture.list();
   for (int i=0; i<cams.length; i++) {
     println(cams[i]);
+  }
+}
+
+
+PImage readLight(PImage cam) {
+  if (IS_FLIPPED) {
+    return flipCanvas(cam);
+  } else {
+    return cam;
   }
 }
 
